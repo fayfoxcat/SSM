@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>改造的品牌列表案列</title>
+	<meta charset="utf-8"> 
+	<!--1.导入Vue包  -->
+	<script type="text/javascript" src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script type="text/javascript" src="https://cdn.bootcss.com/vue-resource/1.5.1/vue-resource.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"/>
+</head>
+<body>
+	<div id="app">
+		
+		<div class="panel panel-primary">
+			<div class="panel-heading">
+				<h3 class="panel-title">添加品牌</h3>
+			</div>
+			<div class="panel-body form-inline">
+				<label>
+					Name:
+					<input type="text" class="form-control" v-model="name"/>
+				</label>
+				<!-- 在Vue中使用事件绑定，为元素只当处理函数的时候，如果加上小括号，则可以加上参数 -->
+				<input type="button" value="添加" class="btn btn-primary" @click="add"/>
+			</div>
+		</div>
+			
+		
+		<table class="table table-bordered table-hover table-striped">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Name</th>
+					<th>Ctime</th>
+					<th>Operation</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="item in list" :key="item.id">
+					<td>{{item.id}}</td>
+					<td>{{item.name}}</td>
+					<td>{{item.ctime}}</td>
+					<td><a href="" @click.prevent="del(item.id)">删除</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<script>
+		//设置全局根路径
+		Vue.http.options.root = "http://127.0.0.1:8080/SSM/";
+		//配置启用全局emulateJSON选项
+		Vue.http.options.emulateJSON = true;
+		var vm = new Vue({
+			el:"#app",
+			data:{
+				name:'',
+				list:[
+					{id:1,name:'宝马',ctime:new Date()},
+					{id:2,name:'雪佛兰',ctime:new Date()},
+					{id:3,name:'玛莎拉蒂',ctime:new Date()}
+				]
+			},
+			created() {
+				//当vm实例的data和methods初始化完毕后,vm实例会自动执行created这个生命周期函数
+				this.getList()
+			},
+			methods:{
+				add(){
+					//设置以哪种表单数据类型提交给服务器{emulateJSON:true}
+					this.$http.post("fox/addcar",{name:this.name},{emulateJSON:true}).then(result =>{
+						if(result.body.status == 0){
+							alert("添加成功");
+						}else{
+							alert("添加失败");
+						}
+					}) 
+				},
+				getList(){
+					this.$http.get("fox/carlist").then(result =>{
+						if(result.body.status == 0){
+							//成功
+							this.list = result.body.list
+						}else{
+							//失败
+							alert("获取数据失败！");
+						}
+					})
+				},
+				del(id){
+					//使用全局emulateJSON选项，省略该参数
+					this.$http.post('fox/deletecar',{id:id}).then(result =>{
+						if(result.body.status == 0){
+							alert("删除成功！")
+						}else{
+							alert("删除失败！")
+						}
+					})
+				}
+				// getList2(){
+				// 	this.$axios.post('/apis/test/testToken.php',data).then(res=>{
+				// 	        console.log(res)
+				// 	})
+				// }
+				
+			}
+		})
+	</script>
+</body>
+</html>
+
+
+
+
+
+
